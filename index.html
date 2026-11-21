@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chinh Phục Quy Luật Di Truyền Menđen & Mở Rộng</title>
+    <!-- Tải Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tải Google Fonts hỗ trợ tiếng Việt mượt mà -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;600;700;800;900&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Be Vietnam Pro"', 'Nunito', 'sans-serif'],
+                    },
+                    colors: {
+                        pea: {
+                            50: '#f2fbf5',
+                            100: '#e1f7e8',
+                            200: '#c3eed2',
+                            300: '#94dfb0',
+                            400: '#5cc886',
+                            500: '#35ad66',
+                            600: '#268d50',
+                            700: '#217042',
+                            800: '#1e5937',
+                            900: '#1a492f',
+                        },
+                        seed: {
+                            100: '#fef9c3',
+                            300: '#fde047',
+                            400: '#facc15',
+                            500: '#eab308',
+                            600: '#ca8a04',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Be Vietnam Pro', 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #dcfce7 0%, #fef9c3 50%, #d1fae5 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Hiệu ứng nền hạt đậu & DNA trôi nổi */
+        .floating-bg-item {
+            position: fixed;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.22;
+            animation: floatSlow 12s infinite ease-in-out alternate;
+        }
+
+        @keyframes floatSlow {
+            0% { transform: translateY(0px) rotate(0deg); }
+            100% { transform: translateY(-25px) rotate(15deg); }
+        }
+
+        /* Hiệu ứng rung khi trả lời sai */
+        @keyframes shakeCard {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            60% { transform: translateX(-6px); }
+            80% { transform: translateX(6px); }
+        }
+
+        .animate-shake {
+            animation: shakeCard 0.45s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        /* Hiệu ứng nảy nhẹ khi trả lời đúng */
+        @keyframes popSuccess {
+            0% { transform: scale(1); }
+            40% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+
+        .animate-pop {
+            animation: popSuccess 0.4s ease-out;
+        }
+
+        /* Nút bấm phong cách 3D mềm mại */
+        .btn-3d {
+            transition: all 0.15s ease;
+            box-shadow: 0 5px 0 rgba(22, 101, 52, 0.35);
+        }
+        .btn-3d:active:not(:disabled) {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 rgba(22, 101, 52, 0.35);
+        }
+
+        .btn-option {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 3px 0 #cbd5e1;
+        }
+        .btn-option:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 0 #94a3b8;
+        }
+        .btn-option:active:not(:disabled) {
+            transform: translateY(1px);
+            box-shadow: 0 2px 0 #94a3b8;
+        }
+
+        /* Hiệu ứng sóng âm thanh khi giọng nói đang đọc */
+        @keyframes pulseVoice {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.12); }
+        }
+        .speaking-pulse {
+            animation: pulseVoice 0.8s infinite ease-in-out;
+        }
+
+        /* Canvas pháo giấy */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        /* Thanh cuộn tinh tế */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #86efac;
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="text-slate-800 flex flex-col justify-between relative selection:bg-pea-200 selection:text-pea-900">
+
+    <!-- Canvas cho hiệu ứng pháo giấy / hạt đậu ăn mừng -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- Trang trí nền sinh học (SVG hạt đậu & xoắn DNA) -->
+    <div class="floating-bg-item top-10 left-6 w-20 h-20 text-pea-600" style="animation-delay: 0s;">
+        <svg viewBox="0 0 100 100" fill="currentColor">
+            <path d="M15,75 C10,45 45,10 85,15 C90,45 55,90 15,75 Z" fill="none" stroke="currentColor" stroke-width="6"/>
+            <circle cx="35" cy="60" r="10"/>
+            <circle cx="53" cy="46" r="11"/>
+            <circle cx="70" cy="31" r="9"/>
+        </svg>
+    </div>
+    <div class="floating-bg-item bottom-16 right-8 w-24 h-24 text-seed-600" style="animation-delay: 2s;">
+        <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="5">
+            <path d="M30,10 Q70,30 30,50 T30,90" />
+            <path d="M70,10 Q30,30 70,50 T70,90" />
+            <line x1="38" y1="20" x2="62" y2="20"/>
+            <line x1="38" y1="40" x2="62" y2="40"/>
+            <line x1="38" y1="60" x2="62" y2="60"/>
+            <line x1="38" y1="80" x2="62" y2="80"/>
+        </svg>
+    </div>
+    <div class="floating-bg-item top-1/3 right-6 w-16 h-16 text-pea-500 hidden md:block" style="animation-delay: 4s;">
+        <svg viewBox="0 0 64 64" fill="currentColor">
+            <circle cx="32" cy="32" r="26" fill="#facc15" stroke="#ca8a04" stroke-width="4"/>
+            <path d="M22,26 Q26,20 30,26" fill="none" stroke="#854d0e" stroke-width="3" stroke-linecap="round"/>
+            <path d="M36,26 Q40,20 44,26" fill="none" stroke="#854d0e" stroke-width="3" stroke-linecap="round"/>
+            <path d="M24,38 Q33,45 42,38" fill="none" stroke="#854d0e" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+    </div>
+
+    <!-- Header chung -->
+    <header class="relative z-10 w-full max-w-4xl mx-auto px-4 pt-4 pb-2 flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5 bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-2xl shadow-sm border border-pea-200">
+            <span class="text-2xl">🌱</span>
+            <div>
+                <h1 class="font-extrabold text-pea-800 text-xs sm:text-base leading-tight">Phòng Thí Nghiệm Menđen</h1>
+                <p class="text-[11px] text-pea-600 font-semibold hidden sm:block">Sinh học 12 • Menđen, Trội không hoàn toàn & Nhóm máu ABO</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <!-- Nút Bật/Tắt Giọng nói AI (TTS) -->
+            <button id="voice-toggle-btn" onclick="toggleVoice()" aria-label="Bật hoặc tắt giọng nói cổ vũ"
+                class="flex items-center gap-1.5 bg-white/90 hover:bg-white text-emerald-800 font-bold text-xs sm:text-sm px-3 py-2 rounded-2xl shadow-sm border border-emerald-200 transition cursor-pointer">
+                <span id="voice-icon" class="text-base sm:text-lg">🗣️</span>
+                <span id="voice-label" class="hidden md:inline">Giọng nói: Bật</span>
+            </button>
+
+            <!-- Nút Bật/Tắt Hiệu ứng âm thanh -->
+            <button id="sound-toggle-btn" onclick="toggleSound()" aria-label="Bật hoặc tắt hiệu ứng âm thanh"
+                class="flex items-center gap-1.5 bg-white/90 hover:bg-white text-pea-800 font-bold text-xs sm:text-sm px-3 py-2 rounded-2xl shadow-sm border border-pea-200 transition cursor-pointer">
+                <span id="sound-icon" class="text-base sm:text-lg">🔊</span>
+                <span id="sound-label" class="hidden md:inline">Âm thanh: Bật</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Vùng nội dung chính -->
+    <main class="relative z-10 flex-grow flex items-center justify-center w-full max-w-4xl mx-auto px-4 py-4">
+
+        <!-- ================= MÀN HÌNH 1: BẮT ĐẦU ================= -->
+        <section id="screen-start" class="w-full max-w-2xl bg-white/95 backdrop-blur-md rounded-3xl shadow-xl border-2 border-pea-200 p-6 sm:p-9 text-center transition-all">
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-pea-100 to-seed-100 border-4 border-pea-300 shadow-inner mb-4 text-4xl">
+                🧬
+            </div>
+            
+            <span class="inline-block bg-pea-100 text-pea-800 text-xs font-extrabold uppercase tracking-wider px-3.5 py-1 rounded-full mb-2">
+                Thử thách Sinh học THPT • 20 Câu Hỏi
+            </span>
+            
+            <h2 class="text-2xl sm:text-4xl font-black text-pea-900 mb-3 leading-tight">
+                Chinh Phục Quy Luật <br class="hidden sm:inline">
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-pea-600 to-emerald-500">Di Truyền Menđen & Mở Rộng</span>
+            </h2>
+            
+            <p class="text-slate-600 text-sm sm:text-base mb-5 leading-relaxed max-w-xl mx-auto">
+                Vượt qua <strong>20 câu hỏi</strong> từ lý thuyết đến bài tập lai 1 & 2 cặp tính trạng, trội không hoàn toàn và di truyền nhóm máu ABO. Có <strong>giọng nói cổ vũ</strong> trực tiếp đồng hành cùng bạn!
+            </p>
+
+            <!-- Các chuyên đề bao gồm -->
+            <div class="flex flex-wrap justify-center gap-1.5 mb-6 max-w-xl mx-auto">
+                <span class="text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-full">📖 Lý thuyết Menđen</span>
+                <span class="text-[11px] font-bold bg-pea-50 text-pea-800 border border-pea-200 px-2.5 py-1 rounded-full">🧫 Số giao tử & Tổ hợp</span>
+                <span class="text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-1 rounded-full">📊 Tỉ lệ 1 KG / 1 KH</span>
+                <span class="text-[11px] font-bold bg-pink-50 text-pink-800 border border-pink-200 px-2.5 py-1 rounded-full">🌸 Trội không hoàn toàn</span>
+                <span class="text-[11px] font-bold bg-rose-50 text-rose-800 border border-rose-200 px-2.5 py-1 rounded-full">🩸 Nhóm máu ABO</span>
+            </div>
+
+            <!-- Nhập tên & Tùy chọn xáo trộn -->
+            <div class="mb-6 text-left max-w-md mx-auto space-y-3">
+                <div>
+                    <label for="player-name-input" class="block text-xs font-extrabold text-pea-800 uppercase tracking-wide mb-1.5 ml-1">
+                        Tên nhà di truyền học tập sự:
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-lg">🧑‍🔬</span>
+                        <input type="text" id="player-name-input" maxlength="25" placeholder="Nhập tên của bạn (VD: Hoàng Nam)..."
+                            class="w-full pl-11 pr-4 py-3 bg-pea-50/70 border-2 border-pea-200 rounded-2xl text-slate-800 font-bold placeholder-slate-400 focus:outline-none focus:border-pea-500 focus:bg-white transition">
+                    </div>
+                </div>
+
+                <label class="flex items-center gap-2.5 cursor-pointer select-none bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 hover:bg-pea-50/50 transition">
+                    <input type="checkbox" id="shuffle-checkbox" class="w-4 h-4 accent-pea-600 rounded cursor-pointer">
+                    <span class="text-xs sm:text-sm font-bold text-slate-700">🔀 Xáo trộn ngẫu nhiên thứ tự 20 câu hỏi</span>
+                </label>
+            </div>
+
+            <!-- Thẻ tóm tắt luật chơi -->
+            <div class="grid grid-cols-3 gap-2.5 mb-7 max-w-lg mx-auto text-xs">
+                <div class="bg-pea-50 border border-pea-200 rounded-2xl p-2.5">
+                    <div class="text-lg mb-0.5">📝</div>
+                    <div class="font-extrabold text-pea-900">20 Câu Hỏi</div>
+                    <div class="text-slate-500">Đa dạng chuyên đề</div>
+                </div>
+                <div class="bg-seed-100/70 border border-seed-300 rounded-2xl p-2.5">
+                    <div class="text-lg mb-0.5">🗣️</div>
+                    <div class="font-extrabold text-amber-900">Giọng Nói Cổ Vũ</div>
+                    <div class="text-slate-600">Đồng hành trực tiếp</div>
+                </div>
+                <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-2.5">
+                    <div class="text-lg mb-0.5">💡</div>
+                    <div class="font-extrabold text-emerald-900">Giải Chi Tiết</div>
+                    <div class="text-slate-500">Công thức dễ nhớ</div>
+                </div>
+            </div>
+
+            <button onclick="startGame()"
+                class="btn-3d w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-pea-600 to-emerald-500 hover:from-pea-500 hover:to-emerald-400 text-white font-black text-lg rounded-2xl cursor-pointer inline-flex items-center justify-center gap-2">
+                <span>Bắt Đầu Thử Thách</span>
+                <span class="text-xl">🚀</span>
+            </button>
+        </section>
+
+        <!-- ================= MÀN HÌNH 2: CHƠI GAME ================= -->
+        <section id="screen-quiz" class="hidden w-full max-w-3xl">
+            <!-- Thanh trạng thái: Tiến trình, Điểm, Combo -->
+            <div class="bg-white/95 backdrop-blur-md rounded-2xl shadow-md border border-pea-200 p-3.5 sm:p-4 mb-4">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+                    <div class="flex items-center gap-2">
+                        <span class="bg-pea-600 text-white font-extrabold text-xs sm:text-sm px-3 py-1 rounded-xl">
+                            Câu <span id="current-q-num">1</span>/20
+                        </span>
+                        <span id="question-topic-badge" class="bg-seed-100 text-amber-900 border border-seed-300 font-bold text-xs px-2.5 py-1 rounded-xl">
+                            Lý thuyết Menđen
+                        </span>
+                    </div>
+
+                    <div class="flex items-center gap-2 sm:gap-3">
+                        <!-- Huy hiệu Combo -->
+                        <div id="combo-badge" class="hidden items-center gap-1 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-extrabold text-xs sm:text-sm px-3 py-1 rounded-xl shadow-sm">
+                            <span>🔥 Combo x<span id="combo-count">0</span></span>
+                        </div>
+
+                        <!-- Điểm số -->
+                        <div class="flex items-center gap-1.5 bg-pea-50 border border-pea-200 text-pea-900 font-extrabold text-xs sm:text-sm px-3 py-1 rounded-xl">
+                            <span>⭐</span>
+                            <span><span id="score-display">0</span> điểm</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Thanh tiến trình trực quan -->
+                <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200">
+                    <div id="progress-bar" class="h-full bg-gradient-to-r from-pea-500 via-emerald-400 to-seed-400 rounded-full transition-all duration-500" style="width: 5%;"></div>
+                </div>
+            </div>
+
+            <!-- Thẻ câu hỏi chính -->
+            <div id="question-card" class="bg-white/95 backdrop-blur-md rounded-3xl shadow-xl border-2 border-pea-200 p-5 sm:p-8 transition-all">
+                <!-- Nội dung câu hỏi -->
+                <div class="mb-6">
+                    <h3 id="question-text" class="text-base sm:text-xl font-extrabold text-slate-800 leading-relaxed">
+                        Đang tải câu hỏi...
+                    </h3>
+                </div>
+
+                <!-- Lưới 4 đáp án A, B, C, D -->
+                <div id="options-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-4">
+                    <!-- Các nút đáp án được sinh bằng JS -->
+                </div>
+
+                <!-- Khu vực phản hồi cảm xúc & Hướng dẫn giải (ẩn trước khi chọn đáp án) -->
+                <div id="feedback-area" class="hidden mt-6 pt-5 border-t-2 border-dashed border-slate-200 transition-all">
+                    <!-- Banner cổ vũ / động viên kèm nút nghe lại giọng nói -->
+                    <div id="emotion-banner" class="rounded-2xl p-4 mb-4 flex items-center justify-between gap-3 border-2">
+                        <div class="flex items-start sm:items-center gap-3.5">
+                            <div id="emotion-icon" class="text-3xl sm:text-4xl flex-shrink-0">🎉</div>
+                            <div>
+                                <div id="emotion-title" class="font-black text-base sm:text-lg"></div>
+                                <p id="emotion-subtitle" class="text-xs sm:text-sm font-semibold opacity-90"></p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="replayVoiceFeedback()" title="Nghe lại lời cổ vũ"
+                            class="flex-shrink-0 w-10 h-10 rounded-xl bg-white/80 hover:bg-white border border-current/20 flex items-center justify-center text-lg shadow-sm transition cursor-pointer">
+                            🔊
+                        </button>
+                    </div>
+
+                    <!-- Khung hướng dẫn giải chi tiết -->
+                    <div class="bg-gradient-to-br from-pea-50 to-emerald-50/70 border-2 border-pea-200 rounded-2xl p-4 sm:p-5 mb-5">
+                        <div class="flex items-center gap-2 text-pea-800 font-black text-sm sm:text-base mb-2">
+                            <span class="text-lg">💡</span>
+                            <span>Hướng dẫn giải chi tiết:</span>
+                        </div>
+                        <div id="explanation-text" class="text-slate-700 text-sm sm:text-base leading-relaxed space-y-1.5">
+                            <!-- Nội dung lời giải -->
+                        </div>
+                    </div>
+
+                    <!-- Nút câu tiếp theo -->
+                    <div class="flex justify-end">
+                        <button id="next-btn" onclick="nextQuestion()"
+                            class="btn-3d w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-pea-600 to-emerald-500 hover:from-pea-500 hover:to-emerald-400 text-white font-black text-base rounded-2xl cursor-pointer inline-flex items-center justify-center gap-2">
+                            <span id="next-btn-text">Câu tiếp theo</span>
+                            <span>➔</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= MÀN HÌNH 3: TỔNG KẾT ================= -->
+        <section id="screen-result" class="hidden w-full max-w-2xl bg-white/95 backdrop-blur-md rounded-3xl shadow-xl border-2 border-pea-200 p-6 sm:p-9 text-center">
+            <!-- Huy hiệu danh hiệu -->
+            <div id="rank-badge-container" class="inline-flex flex-col items-center justify-center mb-3">
+                <div id="rank-icon" class="w-24 h-24 rounded-full bg-gradient-to-tr from-seed-300 via-seed-100 to-pea-200 border-4 border-seed-500 shadow-lg flex items-center justify-center text-5xl mb-3">
+                    🏆
+                </div>
+                <span class="text-xs font-extrabold uppercase tracking-widest text-pea-700 bg-pea-100 px-3 py-1 rounded-full">
+                    Danh Hiệu Đạt Được
+                </span>
+            </div>
+
+            <h2 id="rank-title" class="text-2xl sm:text-3xl font-black text-pea-900 mb-1">
+                Bậc Thầy Menđen
+            </h2>
+            <p class="text-slate-600 font-bold text-sm sm:text-base mb-6">
+                Chúc mừng nhà nghiên cứu <span id="result-player-name" class="text-pea-700 font-black">Bạn</span> đã hoàn thành 20 thử thách!
+            </p>
+
+            <!-- Bảng thống kê kết quả -->
+            <div class="grid grid-cols-3 gap-3 mb-6">
+                <div class="bg-pea-50 border-2 border-pea-200 rounded-2xl p-3.5">
+                    <div class="text-xs font-bold text-slate-500 uppercase mb-1">Số câu đúng</div>
+                    <div class="text-2xl sm:text-3xl font-black text-pea-700">
+                        <span id="final-correct">0</span>/20
+                    </div>
+                </div>
+                <div class="bg-seed-100/80 border-2 border-seed-300 rounded-2xl p-3.5">
+                    <div class="text-xs font-bold text-amber-800 uppercase mb-1">Tổng điểm</div>
+                    <div id="final-score" class="text-2xl sm:text-3xl font-black text-amber-600">
+                        0
+                    </div>
+                </div>
+                <div class="bg-orange-50 border-2 border-orange-200 rounded-2xl p-3.5">
+                    <div class="text-xs font-bold text-orange-800 uppercase mb-1">Combo tối đa</div>
+                    <div class="text-2xl sm:text-3xl font-black text-orange-600">
+                        🔥<span id="final-max-combo">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lời nhận xét tổng kết -->
+            <div id="final-message" class="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm text-slate-700 font-semibold mb-6 leading-relaxed">
+                Bạn đã nắm rất vững các quy luật phân li và phân li độc lập của Menđen!
+            </div>
+
+            <!-- Bảng tổng hợp nhanh 20 câu (Xanh: Đúng, Đỏ: Sai) -->
+            <div class="mb-7 text-left bg-slate-50/90 border border-slate-200 rounded-2xl p-4">
+                <div class="flex items-center justify-between mb-2.5">
+                    <span class="text-xs font-extrabold uppercase tracking-wider text-slate-600">📋 Bảng tổng kết 20 câu hỏi (Nhấn vào số câu để xem lại lời giải)</span>
+                </div>
+                <div id="summary-grid" class="grid grid-cols-5 sm:grid-cols-10 gap-2">
+                    <!-- Sinh bằng JS -->
+                </div>
+                <div id="review-box" class="hidden mt-3.5 p-3.5 bg-white rounded-xl border border-pea-200 text-xs sm:text-sm text-slate-700 space-y-1.5">
+                    <!-- Nội dung xem lại câu hỏi -->
+                </div>
+            </div>
+
+            <!-- Các nút hành động -->
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <button onclick="restartGame()"
+                    class="btn-3d flex-1 px-6 py-3.5 bg-gradient-to-r from-pea-600 to-emerald-500 hover:from-pea-500 hover:to-emerald-400 text-white font-black text-base rounded-2xl cursor-pointer inline-flex items-center justify-center gap-2">
+                    <span>🔄</span>
+                    <span>Chơi Lại 20 Câu</span>
+                </button>
+                <button onclick="backToHome()"
+                    class="px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-base rounded-2xl border border-slate-300 transition cursor-pointer inline-flex items-center justify-center gap-2">
+                    <span>🏠</span>
+                    <span>Đổi Tên / Tùy Chọn</span>
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer nhỏ gọn -->
+    <footer class="relative z-10 text-center py-3 px-4 text-xs text-pea-800/75 font-semibold">
+        Mô phỏng thí nghiệm vườn đậu Hà Lan & Di truyền người • Học vui Sinh học THPT
+    </footer>
+
+    <script>
+        // =========================================================================
+        // 1. NGÂN HÀNG 20 CÂU HỎI TRẮC NGHIỆM (MENĐEN, TRỘI KHÔNG HOÀN TOÀN, ABO)
+        // =========================================================================
+        const QUIZ_BANK = [
+            // --- NHÓM 1: LÝ THUYẾT QUY LUẬT PHÂN LI & PHÂN LI ĐỘC LẬP (CÂU 1 - 4) ---
+            {
+                id: 1,
+                topic: "📖 Lý thuyết • Quy luật phân li",
+                question: "Theo quy luật phân li của Menđen, mỗi tính trạng của cơ thể do nhân tố nào quy định và chúng vận động như thế nào khi giảm phân?",
+                options: [
+                    "Do một cặp allele quy định; các allele hòa trộn vào nhau trong giao tử",
+                    "Do một cặp allele quy định; mỗi allele phân li đồng đều về các giao tử",
+                    "Do một allele duy nhất quy định; không phân li trong giảm phân",
+                    "Do nhiều cặp gene không allele cùng tương tác quy định"
+                ],
+                correctIndex: 1,
+                explanation: `
+                    <p>• <strong>Nội dung quy luật phân li:</strong> Mỗi tính trạng do một cặp allele quy định, một có nguồn gốc từ bố, một có nguồn gốc từ mẹ.</p>
+                    <p>• Các allele tồn tại riêng rẽ, không hòa trộn vào nhau. Khi giảm phân hình thành giao tử, các thành viên của một cặp allele <strong>phân li đồng đều</strong> về các giao tử nên 50% giao tử chứa allele này và 50% giao tử chứa allele kia.</p>
+                `
+            },
+            {
+                id: 2,
+                topic: "📖 Lý thuyết • Cơ sở tế bào học",
+                question: "Cơ sở tế bào học của quy luật phân li độc lập của Menđen là sự phân li độc lập và tổ hợp tự do của các cặp...",
+                options: [
+                    "nhiễm sắc thể tương đồng trong giảm phân và sự thụ tinh ngẫu nhiên",
+                    "chromatid chị em trong nguyên phân của tế bào sinh dưỡng",
+                    "gene nằm trên cùng một nhiễm sắc thể trong giảm phân",
+                    "tính trạng trội và tính trạng lặn ở đời con F<sub>2</sub>"
+                ],
+                correctIndex: 0,
+                explanation: `
+                    <p>• Các cặp allele quy định các cặp tính trạng khác nhau nằm trên <strong>các cặp nhiễm sắc thể (NST) tương đồng khác nhau</strong>.</p>
+                    <p>• Sự phân li độc lập và tổ hợp tự do của các cặp NST tương đồng ở kì sau giảm phân I dẫn đến sự phân li độc lập và tổ hợp tự do của các cặp allele, kết hợp với <strong>thụ tinh ngẫu nhiên</strong> tạo ra nhiều biến dị tổ hợp.</p>
+                `
+            },
+            {
+                id: 3,
+                topic: "📖 Lý thuyết • Điều kiện nghiệm đúng",
+                question: "Điều kiện nghiệm đúng cơ bản nhất cho quy luật phân li độc lập của Menđen là gì?",
+                options: [
+                    "Các cặp allele quy định các tính trạng phải nằm trên cùng một cặp NST",
+                    "Bố mẹ đem lai phải có kiểu hình giống nhau hoàn toàn",
+                    "Mỗi cặp allele quy định một cặp tính trạng nằm trên các cặp NST tương đồng khác nhau",
+                    "Số lượng cá thể ở đời con F<sub>1</sub> phải cực kỳ ít"
+                ],
+                correctIndex: 2,
+                explanation: `
+                    <p>• Để các gene phân li độc lập với nhau thì điều kiện tiên quyết là <strong>các cặp allele quy định các tính trạng khác nhau phải nằm trên các cặp NST tương đồng khác nhau</strong> (mỗi gene một NST).</p>
+                    <p>• Ngoài ra cần có: quá trình giảm phân diễn ra bình thường, sức sống của các giao tử và hợp tử ngang nhau, số lượng cá thể con lai phải đủ lớn.</p>
+                `
+            },
+            {
+                id: 4,
+                topic: "📖 Lý thuyết • Lai phân tích",
+                question: "Phép lai phân tích là phép lai giữa cá thể mang tính trạng trội cần xác định kiểu gene với cá thể mang tính trạng...",
+                options: [
+                    "trội thuần chủng",
+                    "trội không thuần chủng",
+                    "lặn (có kiểu gene đồng hợp lặn)",
+                    "trung gian"
+                ],
+                correctIndex: 2,
+                explanation: `
+                    <p>• <strong>Lai phân tích</strong> là phép lai giữa cá thể mang tính trạng trội cần kiểm tra kiểu gene với cá thể mang tính trạng <strong>lặn</strong> (đồng hợp lặn, VD: <em>aa</em> hoặc <em>aabb</em>).</p>
+                    <p>• Nếu đời con đồng tính (100% trội) → cá thể trội đem lai có kiểu gene <strong>đồng hợp trội</strong>. Nếu đời con phân tính (tỉ lệ 1:1) → cá thể đem lai có kiểu gene <strong>dị hợp</strong>.</p>
+                `
+            },
+
+            // --- NHÓM 2: TÌM SỐ LOẠI GIAO TỬ CỦA KIỂU GENE (CÂU 5 - 6) ---
+            {
+                id: 5,
+                topic: "🧫 Tìm số giao tử • Kiểu gene 2 cặp",
+                question: "Cơ thể có kiểu gene <strong>AaBb</strong> (các gene phân li độc lập) giảm phân bình thường tạo ra tối đa bao nhiêu loại giao tử?",
+                options: [
+                    "2 loại (AB, ab)",
+                    "3 loại (AB, Ab, ab)",
+                    "4 loại (AB, Ab, aB, ab)",
+                    "8 loại giao tử"
+                ],
+                correctIndex: 2,
+                explanation: `
+                    <p>• Áp dụng công thức tính số loại giao tử: <strong>2<sup>n</sup></strong> (với <em>n</em> là số cặp gene dị hợp).</p>
+                    <p>• Kiểu gene <strong>AaBb</strong> có <strong>2</strong> cặp gene dị hợp (Aa và Bb → n = 2).</p>
+                    <p>• Số loại giao tử = 2<sup>2</sup> = <strong>4 loại</strong> với tỉ lệ bằng nhau: <strong>1 AB : 1 Ab : 1 aB : 1 ab</strong>.</p>
+                `
+            },
+            {
+                id: 6,
+                topic: "🧫 Tìm số giao tử • Kiểu gene nhiều cặp",
+                question: "Một cơ thể có kiểu gene <strong>AABbDdEe</strong> (các gene phân li độc lập) giảm phân bình thường tạo ra tối đa bao nhiêu loại giao tử?",
+                options: [
+                    "4 loại giao tử",
+                    "6 loại giao tử",
+                    "8 loại giao tử",
+                    "16 loại giao tử"
+                ],
+                correctIndex: 2,
+                explanation: `
+                    <p>• Đếm số cặp gene dị hợp trong kiểu gene <strong>AABbDdEe</strong>:</p>
+                    <p>  + Cặp <strong>AA</strong>: đồng hợp (cho 1 loại giao tử A).</p>
+                    <p>  + Các cặp <strong>Bb, Dd, Ee</strong>: có <strong>3</strong> cặp dị hợp (n = 3).</p>
+                    <p>• Số loại giao tử tối đa = 2<sup>n</sup> = 2<sup>3</sup> = <strong>8 loại giao tử</strong>.</p>
+                `
+            },
+
+            // --- NHÓM 3: TÌM SỐ TỔ HỢP, SỐ KIỂU GENE, SỐ KIỂU HÌNH Ở ĐỜI CON (CÂU 7 - 10) ---
+            {
+                id: 7,
+                topic: "🧬 Số tổ hợp giao tử",
+                question: "Cho phép lai <strong>P: AaBb × Aabb</strong> (các gene phân li độc lập). Ở đời con F<sub>1</sub> thu được bao nhiêu tổ hợp giao tử?",
+                options: [
+                    "4 tổ hợp",
+                    "6 tổ hợp",
+                    "8 tổ hợp",
+                    "16 tổ hợp"
+                ],
+                correctIndex: 2,
+                explanation: `
+                    <p>• Công thức: <strong>Số tổ hợp giao tử = (Số loại giao tử của bố) × (Số loại giao tử của mẹ)</strong>.</p>
+                    <p>• Cơ thể <strong>AaBb</strong> (2 cặp dị hợp) cho 2<sup>2</sup> = <strong>4 loại giao tử</strong>.</p>
+                    <p>• Cơ thể <strong>Aabb</strong> (1 cặp dị hợp) cho 2<sup>1</sup> = <strong>2 loại giao tử</strong>.</p>
+                    <p>• Tổng số tổ hợp giao tử ở F<sub>1</sub> = 4 × 2 = <strong>8 tổ hợp</strong>.</p>
+                `
+            },
+            {
+                id: 8,
+                topic: "🧬 Số loại kiểu gene ở đời con",
+                question: "Biết các gene phân li độc lập. Phép lai <strong>P: AaBb × AaBb</strong> tạo ra ở đời con F<sub>2</sub> tối đa bao nhiêu loại kiểu gene?",
+                options: [
+                    "4 loại kiểu gene",
+                    "6 loại kiểu gene",
+                    "9 loại kiểu gene",
+                    "16 loại kiểu gene"
+                ],
+                correctIndex: 2,
+                explanation: `
+                    <p>• Tách riêng từng cặp gene của phép lai <strong>AaBb × AaBb</strong> rồi nhân số loại kiểu gene lại:</p>
+                    <p>  + Cặp <strong>Aa × Aa</strong> → tạo ra <strong>3</strong> loại kiểu gene (AA, Aa, aa).</p>
+                    <p>  + Cặp <strong>Bb × Bb</strong> → tạo ra <strong>3</strong> loại kiểu gene (BB, Bb, bb).</p>
+                    <p>• Tổng số loại kiểu gene ở F<sub>2</sub> = 3 × 3 = <strong>9 loại kiểu gene</strong>.</p>
+                `
+            },
+            {
+                id: 9,
+                topic: "🌿 Số loại kiểu hình ở đời con",
+                question: "Mỗi gene quy định một tính trạng, trội hoàn toàn và phân li độc lập. Phép lai <strong>P: AaBb × aaBb</strong> cho đời con F<sub>1</sub> có tối đa bao nhiêu loại kiểu hình?",
+                options: [
+                    "2 loại kiểu hình",
+                    "4 loại kiểu hình",
+                    "6 loại kiểu hình",
+                    "8 loại kiểu hình"
+                ],
+                correctIndex: 1,
+                explanation: `
+                    <p>• Tách riêng từng cặp tính trạng ở phép lai <strong>AaBb × aaBb</strong>:</p>
+                    <p>  + <strong>Aa × aa</strong> → cho <strong>2</strong> loại kiểu hình (1 trội A- : 1 lặn aa).</p>
+                    <p>  + <strong>Bb × Bb</strong> → cho <strong>2</strong> loại kiểu hình (3 trội B- : 1 lặn bb).</p>
+                    <p>• Số loại kiểu hình ở F<sub>1</sub> = 2 × 2 = <strong>4 loại kiểu hình</strong>.</p>
+                `
+            },
+            {
+                id: 10,
+                topic: "📊 Tỉ lệ kiểu gene & kiểu hình chung",
+                question: "Ở đậu Hà Lan, <strong>A</strong>: hạt vàng, <strong>a</strong>: hạt xanh; <strong>B</strong>: vỏ trơn, <strong>b</strong>: vỏ nhăn (trội hoàn toàn, phân li độc lập). Phép lai <strong>P: AaBb × aabb</strong> cho đời con F<sub>1</sub> có tỉ lệ kiểu hình là:",
+                options: [
+                    "9 vàng, trơn : 3 vàng, nhăn : 3 xanh, trơn : 1 xanh, nhăn",
+                    "3 vàng, trơn : 3 vàng, nhăn : 1 xanh, trơn : 1 xanh, nhăn",
+                    "1 vàng, trơn : 1 vàng, nhăn : 1 xanh, trơn : 1 xanh, nhăn",
+                    "1 vàng, trơn : 2 vàng, nhăn : 1 xanh, trơn"
+                ],
+                correctIndex: 2,
+                explanation: `
+                    <p>• Đây là phép lai phân tích 2 cặp tính trạng <strong>AaBb × aabb</strong>:</p>
+                    <p>  + <strong>Aa × aa</strong> → 1 hạt vàng (Aa) : 1 hạt xanh (aa).</p>
+                    <p>  + <strong>Bb × bb</strong> → 1 vỏ trơn (Bb) : 1 vỏ nhăn (bb).</p>
+                    <p>• Nhân tỉ lệ hai cặp: (1 vàng : 1 xanh) × (1 trơn : 1 nhăn) = <strong>1 vàng, trơn : 1 vàng, nhăn : 1 xanh, trơn : 1 xanh, nhăn</strong>.</p>
+                `
+            },
+
+            // --- NHÓM 4: TÌM TỈ LỆ 1 LOẠI KIỂU GENE / 1 LOẠI KIỂU HÌNH CỤ THỂ (CÂU 11 - 14) ---
+            {
+                id: 11,
+                topic: "🎯 Tỉ lệ 1 loại kiểu gene",
+                question: "Cho phép lai <strong>P: AaBb × AaBb</strong> (các gene phân li độc lập). Theo lí thuyết, tỉ lệ cá thể có kiểu gene <strong>AaBb</strong> ở đời con F<sub>2</sub> là bao nhiêu?",
+                options: [
+                    "1/16",
+                    "2/16 (1/8)",
+                    "4/16 (1/4)",
+                    "9/16"
+                ],
+                correctIndex: 2,
+                explanation: `
+                    <p>• Tách riêng từng cặp gene để tính xác suất xuất hiện kiểu gene <strong>AaBb</strong>:</p>
+                    <p>  + Cặp <strong>Aa × Aa</strong> → tỉ lệ kiểu gene <strong>Aa</strong> là <strong>2/4 = 1/2</strong>.</p>
+                    <p>  + Cặp <strong>Bb × Bb</strong> → tỉ lệ kiểu gene <strong>Bb</strong> là <strong>2/4 = 1/2</strong>.</p>
+                    <p>• Tỉ lệ kiểu gene <strong>AaBb</strong> ở F<sub>2</sub> = 1/2 × 1/2 = <strong>1/4 (hay 4/16)</strong>.</p>
+                `
+            },
+            {
+                id: 12,
+                topic: "🎯 Tỉ lệ 1 loại kiểu gene",
+                question: "Phép lai <strong>P: AaBb × Aabb</strong> (các gene phân li độc lập). Tỉ lệ đời con F<sub>1</sub> có kiểu gene đồng hợp lặn <strong>aabb</strong> chiếm tỉ lệ bao nhiêu?",
+                options: [
+                    "1/16",
+                    "1/8",
+                    "1/4",
+                    "3/8"
+                ],
+                correctIndex: 1,
+                explanation: `
+                    <p>• Tách riêng từng cặp gene của phép lai <strong>AaBb × Aabb</strong>:</p>
+                    <p>  + Cặp <strong>Aa × Aa</strong> → tỉ lệ kiểu gene <strong>aa</strong> là <strong>1/4</strong>.</p>
+                    <p>  + Cặp <strong>Bb × bb</strong> → tỉ lệ kiểu gene <strong>bb</strong> là <strong>1/2</strong>.</p>
+                    <p>• Tỉ lệ kiểu gene <strong>aabb</strong> ở F<sub>1</sub> = 1/4 × 1/2 = <strong>1/8</strong>.</p>
+                `
+            },
+            {
+                id: 13,
+                topic: "🎯 Tỉ lệ 1 loại kiểu hình",
+                question: "Ở đậu Hà Lan, <strong>A</strong>: thân cao trội hoàn toàn so với <strong>a</strong>: thân thấp; <strong>B</strong>: hoa đỏ trội hoàn toàn so với <strong>b</strong>: hoa trắng (phân li độc lập). Phép lai <strong>P: AaBb × AaBb</strong> cho đời con F<sub>2</sub> có tỉ lệ kiểu hình <strong>thân cao, hoa trắng (A-bb)</strong> là bao nhiêu?",
+                options: [
+                    "9/16",
+                    "3/16",
+                    "1/16",
+                    "3/8"
+                ],
+                correctIndex: 1,
+                explanation: `
+                    <p>• Kiểu hình <strong>thân cao, hoa trắng</strong> có kiểu gene dạng <strong>A-bb</strong>:</p>
+                    <p>  + Cặp <strong>Aa × Aa</strong> → tỉ lệ thân cao (<strong>A-</strong>) = <strong>3/4</strong>.</p>
+                    <p>  + Cặp <strong>Bb × Bb</strong> → tỉ lệ hoa trắng (<strong>bb</strong>) = <strong>1/4</strong>.</p>
+                    <p>• Tỉ lệ kiểu hình thân cao, hoa trắng ở F<sub>2</sub> = 3/4 × 1/4 = <strong>3/16</strong>.</p>
+                `
+            },
+            {
+                id: 14,
+                topic: "🎯 Tỉ lệ 1 loại kiểu hình",
+                question: "Mỗi gene quy định một tính trạng, trội hoàn toàn và phân li độc lập. Phép lai <strong>P: AaBb × Aabb</strong> cho đời con F<sub>1</sub> có kiểu hình mang <strong>cả 2 tính trạng trội (A-B-)</strong> chiếm tỉ lệ bao nhiêu?",
+                options: [
+                    "9/16",
+                    "3/8",
+                    "1/4",
+                    "1/8"
+                ],
+                correctIndex: 1,
+                explanation: `
+                    <p>• Kiểu hình mang cả 2 tính trạng trội có kiểu gene dạng <strong>A-B-</strong>:</p>
+                    <p>  + Cặp <strong>Aa × Aa</strong> → tỉ lệ kiểu hình trội (<strong>A-</strong>) = <strong>3/4</strong>.</p>
+                    <p>  + Cặp <strong>Bb × bb</strong> → tỉ lệ kiểu hình trội (<strong>B-</strong>) = <strong>1/2</strong>.</p>
+                    <p>• Tỉ lệ kiểu hình <strong>A-B-</strong> ở F<sub>1</sub> = 3/4 × 1/2 = <strong>3/8</strong>.</p>
+                `
+            },
+
+            // --- NHÓM 5: BÀI TẬP TRỘI KHÔNG HOÀN TOÀN (CÂU 15 - 17) ---
+            {
+                id: 15,
+                topic: "🌸 Trội không hoàn toàn • Lai 1 cặp",
+                question: "Ở cây hoa phấn (<em>Mirabilis jalapa</em>), tính trạng màu hoa di truyền <strong>trội không hoàn toàn</strong>: <strong>AA</strong> quy định hoa đỏ, <strong>Aa</strong> quy định hoa hồng, <strong>aa</strong> quy định hoa trắng. Khi cho cây hoa hồng tự thụ phấn (<strong>Aa × Aa</strong>), tỉ lệ kiểu hình ở đời con F<sub>1</sub> là:",
+                options: [
+                    "3 hoa đỏ : 1 hoa trắng",
+                    "1 hoa đỏ : 1 hoa trắng",
+                    "1 hoa đỏ : 2 hoa hồng : 1 hoa trắng",
+                    "100% hoa hồng"
+                ],
+                correctIndex: 2,
+                explanation: `
+                    <p>• Trong di truyền <strong>trội không hoàn toàn</strong>, cá thể dị hợp (<strong>Aa</strong>) biểu hiện kiểu hình trung gian (hoa hồng) nên tỉ lệ kiểu hình trùng với tỉ lệ kiểu gene.</p>
+                    <p>• Phép lai <strong>P: Aa × Aa</strong> → F<sub>1</sub> có tỉ lệ kiểu gene: <strong>1 AA : 2 Aa : 1 aa</strong>.</p>
+                    <p>• Vậy tỉ lệ kiểu hình ở F<sub>1</sub> là: <strong>1 hoa đỏ : 2 hoa hồng : 1 hoa trắng</strong>.</p>
+                `
+            },
+            {
+                id: 16,
+                topic: "🌸 Trội không hoàn toàn • Phép lai cơ bản",
+                question: "Ở một loài thực vật, <strong>AA</strong>: quả tròn, <strong>Aa</strong>: quả bầu dục, <strong>aa</strong>: quả dài (trội không hoàn toàn). Phép lai giữa cây quả tròn với cây quả bầu dục (<strong>AA × Aa</strong>) cho đời con F<sub>1</sub> có tỉ lệ kiểu hình như thế nào?",
+                options: [
+                    "100% quả tròn",
+                    "1 quả tròn : 1 quả bầu dục",
+                    "1 quả tròn : 2 quả bầu dục : 1 quả dài",
+                    "3 quả tròn : 1 quả dài"
+                ],
+                correctIndex: 1,
+                explanation: `
+                    <p>• Cây quả tròn (<strong>AA</strong>) cho 1 loại giao tử <strong>A</strong>.</p>
+                    <p>• Cây quả bầu dục (<strong>Aa</strong>) cho 2 loại giao tử <strong>1 A : 1 a</strong>.</p>
+                    <p>• Đời con F<sub>1</sub> có tỉ lệ kiểu gene: <strong>1 AA : 1 Aa</strong> → Tỉ lệ kiểu hình: <strong>1 quả tròn : 1 quả bầu dục</strong>.</p>
+                `
+            },
+            {
+                id: 17,
+                topic: "🌸 Trội không hoàn toàn • Kết hợp 2 cặp",
+                question: "Ở một loài cây, <strong>AA</strong>: hoa đỏ, <strong>Aa</strong>: hoa hồng, <strong>aa</strong>: hoa trắng (trội không hoàn toàn); <strong>B</strong>: thân cao trội hoàn toàn so với <strong>b</strong>: thân thấp. Hai cặp gene phân li độc lập. Phép lai <strong>P: AaBb × AaBb</strong> cho đời con F<sub>1</sub> có bao nhiêu loại kiểu hình?",
+                options: [
+                    "4 loại kiểu hình",
+                    "6 loại kiểu hình",
+                    "8 loại kiểu hình",
+                    "9 loại kiểu hình"
+                ],
+                correctIndex: 1,
+                explanation: `
+                    <p>• Tách riêng từng cặp tính trạng của phép lai <strong>AaBb × AaBb</strong>:</p>
+                    <p>  + Cặp <strong>Aa × Aa</strong> (trội không hoàn toàn) → cho <strong>3</strong> loại kiểu hình (đỏ, hồng, trắng).</p>
+                    <p>  + Cặp <strong>Bb × Bb</strong> (trội hoàn toàn) → cho <strong>2</strong> loại kiểu hình (cao, thấp).</p>
+                    <p>• Số loại kiểu hình tối đa ở F<sub>1</sub> = 3 × 2 = <strong>6 loại kiểu hình</strong>.</p>
+                `
+            },
+
+            // --- NHÓM 6: BÀI TẬP DI TRUYỀN NHÓM MÁU HỆ ABO Ở NGƯỜI (CÂU 18 - 20) ---
+            {
+                id: 18,
+                topic: "🩸 Nhóm máu ABO • Kiểu gene",
+                question: "Ở người, sự di truyền nhóm máu hệ ABO do 3 allele <strong>I<sup>A</sup>, I<sup>B</sup>, I<sup>O</sup></strong> quy định (trong đó I<sup>A</sup> và I<sup>B</sup> đồng trội, cùng trội hoàn toàn so với I<sup>O</sup>). Một người có nhóm máu <strong>A</strong> có thể có những kiểu gene nào?",
+                options: [
+                    "Chỉ có kiểu gene I<sup>A</sup>I<sup>A</sup>",
+                    "I<sup>A</sup>I<sup>A</sup> hoặc I<sup>A</sup>I<sup>O</sup>",
+                    "I<sup>A</sup>I<sup>B</sup> hoặc I<sup>A</sup>I<sup>O</sup>",
+                    "I<sup>A</sup>I<sup>A</sup>, I<sup>A</sup>I<sup>B</sup> hoặc I<sup>A</sup>I<sup>O</sup>"
+                ],
+                correctIndex: 1,
+                explanation: `
+                    <p>• Quy ước kiểu gene các nhóm máu hệ ABO ở người:</p>
+                    <p>  + Nhóm máu A: <strong>I<sup>A</sup>I<sup>A</sup></strong> hoặc <strong>I<sup>A</sup>I<sup>O</sup></strong> (2 kiểu gene).</p>
+                    <p>  + Nhóm máu B: <strong>I<sup>B</sup>I<sup>B</sup></strong> hoặc <strong>I<sup>B</sup>I<sup>O</sup></strong> (2 kiểu gene).</p>
+                    <p>  + Nhóm máu AB: <strong>I<sup>A</sup>I<sup>B</sup></strong> (1 kiểu gene); Nhóm máu O: <strong>I<sup>O</sup>I<sup>O</sup></strong> (1 kiểu gene).</p>
+                `
+            },
+            {
+                id: 19,
+                topic: "🩸 Nhóm máu ABO • Xác suất sinh con",
+                question: "Ở người, bố có nhóm máu A (kiểu gene <strong>I<sup>A</sup>I<sup>O</sup></strong>) kết hôn với mẹ có nhóm máu B (kiểu gene <strong>I<sup>B</sup>I<sup>O</sup></strong>). Xác suất để cặp vợ chồng này sinh được một người con có <strong>nhóm máu O</strong> là bao nhiêu?",
+                options: [
+                    "0%",
+                    "25% (1/4)",
+                    "50% (1/2)",
+                    "75% (3/4)"
+                ],
+                correctIndex: 1,
+                explanation: `
+                    <p>• Sơ đồ lai: <strong>P: I<sup>A</sup>I<sup>O</sup> (máu A) × I<sup>B</sup>I<sup>O</sup> (máu B)</strong>.</p>
+                    <p>• Giao tử P: Bố cho (1/2 I<sup>A</sup> : 1/2 I<sup>O</sup>); Mẹ cho (1/2 I<sup>B</sup> : 1/2 I<sup>O</sup>).</p>
+                    <p>• Đời con F<sub>1</sub>: 1/4 I<sup>A</sup>I<sup>B</sup> (máu AB) : 1/4 I<sup>A</sup>I<sup>O</sup> (máu A) : 1/4 I<sup>B</sup>I<sup>O</sup> (máu B) : <strong>1/4 I<sup>O</sup>I<sup>O</sup> (máu O)</strong>.</p>
+                    <p>• Vậy xác suất sinh con nhóm máu O là <strong>1/4 = 25%</strong>.</p>
+                `
+            },
+            {
+                id: 20,
+                topic: "🩸 Nhóm máu ABO • Biện luận huyết thống",
+                question: "Một cặp vợ chồng đều có <strong>nhóm máu AB</strong> (kiểu gene <strong>I<sup>A</sup>I<sup>B</sup></strong>). Theo quy luật di truyền, các con của họ <strong>KHÔNG THỂ</strong> mang nhóm máu nào sau đây?",
+                options: [
+                    "Nhóm máu A",
+                    "Nhóm máu B",
+                    "Nhóm máu AB",
+                    "Nhóm máu O"
+                ],
+                correctIndex: 3,
+                explanation: `
+                    <p>• Sơ đồ lai: <strong>P: I<sup>A</sup>I<sup>B</sup> (máu AB) × I<sup>A</sup>I<sup>B</sup> (máu AB)</strong>.</p>
+                    <p>• Giao tử P: Mỗi bên bố và mẹ đều chỉ tạo ra 2 loại giao tử là <strong>I<sup>A</sup></strong> và <strong>I<sup>B</sup></strong> (không có giao tử I<sup>O</sup>).</p>
+                    <p>• Đời con F<sub>1</sub> gồm: 1/4 I<sup>A</sup>I<sup>A</sup> (máu A) : 2/4 I<sup>A</sup>I<sup>B</sup> (máu AB) : 1/4 I<sup>B</sup>I<sup>B</sup> (máu B).</p>
+                    <p>• Vì không có giao tử I<sup>O</sup> nên cặp vợ chồng này <strong>không thể sinh con có nhóm máu O (I<sup>O</sup>I<sup>O</sup>)</strong>.</p>
+                `
+            }
+        ];
+
+        // =========================================================================
+        // 2. CÁC CÂU CỔ VŨ & ĐỘNG VIÊN (HIỂN THỊ + ĐỌC GIỌNG NÓI TIẾNG VIỆT)
+        // =========================================================================
+        const PRAISE_MESSAGES = [
+            {
+                title: "Tuyệt vời! Bạn giỏi quá!",
+                sub: "Tư duy di truyền học cực kỳ sắc bén!",
+                speech: "Tuyệt vời! Bạn giỏi quá! Chúc mừng bạn đã trả lời chính xác!"
+            },
+            {
+                title: "Chính xác! Tiếp tục phát huy nhé!",
+                sub: "Hạt đậu Hà Lan đang nảy mầm rực rỡ nhờ bạn!",
+                speech: "Chính xác! Tiếp tục phát huy phong độ tuyệt vời này nhé!"
+            },
+            {
+                title: "Xuất sắc! Đúng chuẩn nhà di truyền học!",
+                sub: "Không phép lai nào có thể làm khó được bạn!",
+                speech: "Xuất sắc! Đúng chuẩn nhà di truyền học tương lai!"
+            },
+            {
+                title: "Quá đỉnh! Bạn nắm bài rất chắc!",
+                sub: "Ghi điểm trọn vẹn cho câu hỏi này!",
+                speech: "Quá đỉnh! Bạn nắm kiến thức di truyền rất chắc!"
+            },
+            {
+                title: "Hoàn hảo! Một bước tiến lớn!",
+                sub: "Giữ vững tinh thần cho thử thách tiếp theo nào!",
+                speech: "Hoàn hảo! Câu trả lời hoàn toàn chính xác!"
+            }
+        ];
+
+        const ENCOURAGE_MESSAGES = [
+            {
+                title: "Tiếc quá, gần đúng rồi! Cố gắng ở câu sau nhé!",
+                sub: "Xem hướng dẫn bên dưới để nắm chắc công thức nhé!",
+                speech: "Tiếc quá, gần đúng rồi! Cố gắng lên ở câu sau nhé!"
+            },
+            {
+                title: "Không sao đâu, cùng xem hướng dẫn giải nhé!",
+                sub: "Sai một lần là một lần nhớ sâu kiến thức hơn!",
+                speech: "Không sao đâu, bạn hãy xem hướng dẫn giải bên dưới để hiểu rõ hơn nhé!"
+            },
+            {
+                title: "Suýt nữa thì đúng rồi, đừng nản lòng nhé!",
+                sub: "Ngay cả Menđen cũng làm hàng ngàn thí nghiệm mới thành công!",
+                speech: "Suýt nữa thì đúng rồi, đừng nản lòng nhé! Bạn làm được mà!"
+            },
+            {
+                title: "Chưa chính xác rồi, nhưng cố lên nào!",
+                sub: "Đọc kỹ mẹo giải bên dưới để ghi điểm ở câu tiếp theo nhé!",
+                speech: "Chưa chính xác rồi, cố lên nào! Câu sau chắc chắn bạn sẽ làm đúng!"
+            }
+        ];
+
+        // =========================================================================
+        // 3. QUẢN LÝ TRẠNG THÁI TRÒ CHƠI
+        // =========================================================================
+        let activeQuestions = [...QUIZ_BANK];
+
+        let state = {
+            playerName: "Nhà Nghiên Cứu",
+            currentIndex: 0,
+            score: 0,
+            correctCount: 0,
+            combo: 0,
+            maxCombo: 0,
+            isAnswered: false,
+            soundEnabled: true,
+            voiceEnabled: true,
+            lastSpokenText: "",
+            history: [] // Lưu kết quả từng câu để xem lại cuối game
+        };
+
+        // =========================================================================
+        // 4. BỘ TỔNG HỢP GIỌNG NÓI TIẾNG VIỆT (WEB SPEECH API) & ÂM THANH (WEB AUDIO)
+        // =========================================================================
+        let audioCtx = null;
+        let selectedViVoice = null;
+
+        // Tìm giọng đọc tiếng Việt tốt nhất trên thiết bị người dùng
+        function loadVietnameseVoice() {
+            if (!('speechSynthesis' in window)) return;
+            const voices = window.speechSynthesis.getVoices();
+            if (!voices || voices.length === 0) return;
+
+            selectedViVoice =
+                voices.find(v => v.lang.toLowerCase().includes('vi') && (v.name.includes('Google') || v.name.includes('HoaiMy') || v.name.includes('NamMinh') || v.name.includes('Natural'))) ||
+                voices.find(v => v.lang.toLowerCase().includes('vi')) ||
+                null;
+        }
+
+        if ('speechSynthesis' in window) {
+            loadVietnameseVoice();
+            window.speechSynthesis.onvoiceschanged = loadVietnameseVoice;
+        }
+
+        function speakVietnamese(text) {
+            state.lastSpokenText = text;
+            if (!state.voiceEnabled || !('speechSynthesis' in window)) return;
+
+            try {
+                window.speechSynthesis.cancel(); // Dừng câu đang đọc dở nếu có
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'vi-VN';
+                if (selectedViVoice) {
+                    utterance.voice = selectedViVoice;
+                }
+                utterance.rate = 1.03;  // Tốc độ tự nhiên, tươi tắn
+                utterance.pitch = 1.08; // Cao độ thân thiện, truyền cảm
+
+                const emotionIcon = document.getElementById('emotion-icon');
+                utterance.onstart = () => {
+                    if (emotionIcon) emotionIcon.classList.add('speaking-pulse');
+                };
+                utterance.onend = () => {
+                    if (emotionIcon) emotionIcon.classList.remove('speaking-pulse');
+                };
+                utterance.onerror = () => {
+                    if (emotionIcon) emotionIcon.classList.remove('speaking-pulse');
+                };
+
+                window.speechSynthesis.speak(utterance);
+            } catch (err) {
+                // Trình duyệt không hỗ trợ TTS thì vẫn hiển thị banner chữ mượt mà
+            }
+        }
+
+        function replayVoiceFeedback() {
+            if (state.lastSpokenText) {
+                // Tạm bật đọc lại kể cả khi người dùng bấm nút loa thủ công
+                const prevVoice = state.voiceEnabled;
+                state.voiceEnabled = true;
+                speakVietnamese(state.lastSpokenText);
+                state.voiceEnabled = prevVoice;
+            }
+        }
+
+        function toggleVoice() {
+            state.voiceEnabled = !state.voiceEnabled;
+            const icon = document.getElementById('voice-icon');
+            const label = document.getElementById('voice-label');
+            if (state.voiceEnabled) {
+                icon.textContent = '🗣️';
+                label.textContent = 'Giọng nói: Bật';
+                speakVietnamese("Đã bật giọng nói cổ vũ!");
+            } else {
+                icon.textContent = '🤐';
+                label.textContent = 'Giọng nói: Tắt';
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                }
+            }
+        }
+
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) {
+                    audioCtx = new AudioContext();
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function toggleSound() {
+            state.soundEnabled = !state.soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            const label = document.getElementById('sound-label');
+            if (state.soundEnabled) {
+                icon.textContent = '🔊';
+                label.textContent = 'Âm thanh: Bật';
+                initAudio();
+                playClickSound();
+            } else {
+                icon.textContent = '🔇';
+                label.textContent = 'Âm thanh: Tắt';
+            }
+        }
+
+        function playTone(freq, type, duration, delay = 0, volume = 0.14) {
+            if (!state.soundEnabled) return;
+            try {
+                initAudio();
+                if (!audioCtx) return;
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime + delay);
+
+                gain.gain.setValueAtTime(volume, audioCtx.currentTime + delay);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + duration);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start(audioCtx.currentTime + delay);
+                osc.stop(audioCtx.currentTime + delay + duration);
+            } catch (e) {
+                // Bỏ qua lỗi audio policy
+            }
+        }
+
+        function playClickSound() {
+            playTone(520, 'sine', 0.08, 0, 0.1);
+        }
+
+        function playCorrectSound() {
+            playTone(523.25, 'triangle', 0.15, 0, 0.15);
+            playTone(659.25, 'triangle', 0.15, 0.08, 0.15);
+            playTone(783.99, 'triangle', 0.18, 0.16, 0.15);
+            playTone(1046.50, 'sine', 0.32, 0.24, 0.16);
+        }
+
+        function playWrongSound() {
+            playTone(260, 'sawtooth', 0.18, 0, 0.08);
+            playTone(210, 'sawtooth', 0.28, 0.14, 0.08);
+        }
+
+        function playVictorySound() {
+            const notes = [523.25, 659.25, 783.99, 1046.50, 783.99, 1046.50];
+            const times = [0, 0.12, 0.24, 0.36, 0.55, 0.70];
+            const durs  = [0.15, 0.15, 0.15, 0.2, 0.15, 0.5];
+            notes.forEach((n, i) => playTone(n, 'triangle', durs[i], times[i], 0.16));
+        }
+
+        // =========================================================================
+        // 5. HIỆU ỨNG PHÁO GIẤY & HẠT ĐẬU ĂN MỪNG (CANVAS)
+        // =========================================================================
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let animationFrameId = null;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function launchConfetti(intensity = 45) {
+            const colors = ['#22c55e', '#facc15', '#10b981', '#eab308', '#38bdf8', '#fb923c'];
+            for (let i = 0; i < intensity; i++) {
+                particles.push({
+                    x: canvas.width * (0.2 + Math.random() * 0.6),
+                    y: canvas.height * 0.45,
+                    vx: (Math.random() - 0.5) * 14,
+                    vy: (Math.random() - 1.1) * 14 - 3,
+                    size: Math.random() * 8 + 5,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    isPea: Math.random() > 0.45,
+                    rotation: Math.random() * 360,
+                    rotSpeed: (Math.random() - 0.5) * 12,
+                    gravity: 0.42,
+                    alpha: 1
+                });
+            }
+            if (!animationFrameId) {
+                animateConfetti();
+            }
+        }
+
+        function animateConfetti() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach((p, idx) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += p.gravity;
+                p.vx *= 0.98;
+                p.rotation += p.rotSpeed;
+                p.alpha -= 0.014;
+
+                if (p.alpha <= 0) {
+                    particles.splice(idx, 1);
+                    return;
+                }
+
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, p.alpha);
+                ctx.translate(p.x, p.y);
+                ctx.rotate((p.rotation * Math.PI) / 180);
+                ctx.fillStyle = p.color;
+
+                if (p.isPea) {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, p.size * 0.65, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+                }
+                ctx.restore();
+            });
+
+            if (particles.length > 0) {
+                animationFrameId = requestAnimationFrame(animateConfetti);
+            } else {
+                animationFrameId = null;
+            }
+        }
+
+        // =========================================================================
+        // 6. LOGIC ĐIỀU HƯỚNG & XỬ LÝ 20 CÂU HỎI
+        // =========================================================================
+        function showScreen(screenId) {
+            ['screen-start', 'screen-quiz', 'screen-result'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        function prepareQuestions() {
+            const shouldShuffle = document.getElementById('shuffle-checkbox').checked;
+            activeQuestions = [...QUIZ_BANK];
+            if (shouldShuffle) {
+                for (let i = activeQuestions.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [activeQuestions[i], activeQuestions[j]] = [activeQuestions[j], activeQuestions[i]];
+                }
+            }
+        }
+
+        function startGame() {
+            initAudio();
+            loadVietnameseVoice();
+            playClickSound();
+            prepareQuestions();
+
+            const nameInput = document.getElementById('player-name-input').value.trim();
+            state.playerName = nameInput || "Nhà Di Truyền Học Trẻ";
+            state.currentIndex = 0;
+            state.score = 0;
+            state.correctCount = 0;
+            state.combo = 0;
+            state.maxCombo = 0;
+            state.isAnswered = false;
+            state.history = [];
+
+            speakVietnamese(`Chào mừng ${state.playerName} đến với phòng thí nghiệm Menđen! Chúc bạn chinh phục thành công 20 câu hỏi!`);
+
+            updateStatsUI();
+            showScreen('screen-quiz');
+            renderQuestion();
+        }
+
+        function restartGame() {
+            playClickSound();
+            prepareQuestions();
+            state.currentIndex = 0;
+            state.score = 0;
+            state.correctCount = 0;
+            state.combo = 0;
+            state.maxCombo = 0;
+            state.isAnswered = false;
+            state.history = [];
+
+            updateStatsUI();
+            showScreen('screen-quiz');
+            renderQuestion();
+        }
+
+        function backToHome() {
+            playClickSound();
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+            showScreen('screen-start');
+        }
+
+        function updateStatsUI() {
+            document.getElementById('current-q-num').textContent = state.currentIndex + 1;
+            document.getElementById('score-display').textContent = state.score;
+
+            const progressPercent = ((state.currentIndex + 1) / activeQuestions.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+
+            const comboBadge = document.getElementById('combo-badge');
+            const comboCount = document.getElementById('combo-count');
+            if (state.combo >= 2) {
+                comboBadge.classList.remove('hidden');
+                comboBadge.classList.add('flex');
+                comboCount.textContent = state.combo;
+            } else {
+                comboBadge.classList.add('hidden');
+                comboBadge.classList.remove('flex');
+            }
+        }
+
+        function renderQuestion() {
+            const q = activeQuestions[state.currentIndex];
+            state.isAnswered = false;
+
+            const card = document.getElementById('question-card');
+            card.classList.remove('animate-shake', 'animate-pop');
+
+            document.getElementById('question-topic-badge').textContent = q.topic;
+            document.getElementById('question-text').innerHTML = q.question;
+            updateStatsUI();
+
+            document.getElementById('feedback-area').classList.add('hidden');
+
+            const letters = ['A', 'B', 'C', 'D'];
+            const grid = document.getElementById('options-grid');
+            grid.innerHTML = '';
+
+            q.options.forEach((optText, idx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.id = `opt-btn-${idx}`;
+                btn.onclick = () => selectAnswer(idx);
+                btn.className = "btn-option w-full text-left p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-pea-400 hover:bg-pea-50/50 flex items-center gap-3.5 cursor-pointer group";
+
+                btn.innerHTML = `
+                    <span id="opt-letter-${idx}" class="w-9 h-9 rounded-xl bg-pea-100 text-pea-800 group-hover:bg-pea-600 group-hover:text-white font-black text-base flex items-center justify-center flex-shrink-0 transition-colors">
+                        ${letters[idx]}
+                    </span>
+                    <span class="font-bold text-slate-800 text-sm sm:text-base leading-snug flex-grow">
+                        ${optText}
+                    </span>
+                    <span id="opt-status-${idx}" class="text-xl flex-shrink-0"></span>
+                `;
+                grid.appendChild(btn);
+            });
+
+            const nextBtnText = document.getElementById('next-btn-text');
+            nextBtnText.textContent = (state.currentIndex === activeQuestions.length - 1) ? "Xem Kết Quả Tổng Kết" : "Câu tiếp theo";
+        }
+
+        function selectAnswer(selectedIndex) {
+            if (state.isAnswered) return;
+            state.isAnswered = true;
+
+            const q = activeQuestions[state.currentIndex];
+            const isCorrect = (selectedIndex === q.correctIndex);
+            const card = document.getElementById('question-card');
+
+            // Lưu lịch sử trả lời
+            state.history.push({
+                index: state.currentIndex,
+                questionObj: q,
+                selectedIndex: selectedIndex,
+                isCorrect: isCorrect
+            });
+
+            // Khóa các nút đáp án & hiển thị màu sắc phản hồi
+            q.options.forEach((_, idx) => {
+                const btn = document.getElementById(`opt-btn-${idx}`);
+                const letterSpan = document.getElementById(`opt-letter-${idx}`);
+                const statusSpan = document.getElementById(`opt-status-${idx}`);
+                btn.disabled = true;
+                btn.classList.remove('hover:border-pea-400', 'hover:bg-pea-50/50');
+
+                if (idx === q.correctIndex) {
+                    btn.classList.remove('border-slate-200', 'bg-white');
+                    btn.classList.add('border-emerald-500', 'bg-emerald-50');
+                    letterSpan.className = "w-9 h-9 rounded-xl bg-emerald-600 text-white font-black text-base flex items-center justify-center flex-shrink-0";
+                    statusSpan.textContent = "✅";
+                } else if (idx === selectedIndex && !isCorrect) {
+                    btn.classList.remove('border-slate-200', 'bg-white');
+                    btn.classList.add('border-rose-400', 'bg-rose-50');
+                    letterSpan.className = "w-9 h-9 rounded-xl bg-rose-500 text-white font-black text-base flex items-center justify-center flex-shrink-0";
+                    statusSpan.textContent = "❌";
+                } else {
+                    btn.classList.add('opacity-60');
+                }
+            });
+
+            const banner = document.getElementById('emotion-banner');
+            const emotionIcon = document.getElementById('emotion-icon');
+            const emotionTitle = document.getElementById('emotion-title');
+            const emotionSubtitle = document.getElementById('emotion-subtitle');
+
+            if (isCorrect) {
+                state.correctCount++;
+                state.combo++;
+                if (state.combo > state.maxCombo) state.maxCombo = state.combo;
+
+                const comboBonus = Math.min((state.combo - 1) * 10, 50);
+                state.score += (100 + comboBonus);
+
+                playCorrectSound();
+                launchConfetti(45);
+                card.classList.add('animate-pop');
+
+                const msg = PRAISE_MESSAGES[Math.floor(Math.random() * PRAISE_MESSAGES.length)];
+                banner.className = "rounded-2xl p-4 mb-4 flex items-center justify-between gap-3 border-2 bg-emerald-100/85 border-emerald-400 text-emerald-950";
+                emotionIcon.textContent = state.combo >= 3 ? "🔥" : "🎉";
+                emotionTitle.textContent = msg.title + (comboBonus > 0 ? ` (+${100 + comboBonus} điểm)` : " (+100 điểm)");
+                emotionSubtitle.textContent = msg.sub;
+
+                // Đọc lời cổ vũ bằng giọng nói tiếng Việt
+                speakVietnamese(msg.speech);
+            } else {
+                state.combo = 0;
+                playWrongSound();
+                card.classList.add('animate-shake');
+
+                const msg = ENCOURAGE_MESSAGES[Math.floor(Math.random() * ENCOURAGE_MESSAGES.length)];
+                banner.className = "rounded-2xl p-4 mb-4 flex items-center justify-between gap-3 border-2 bg-amber-50 border-amber-300 text-amber-950";
+                emotionIcon.textContent = "💪";
+                emotionTitle.textContent = msg.title;
+                emotionSubtitle.textContent = msg.sub;
+
+                // Đọc lời động viên bằng giọng nói tiếng Việt
+                speakVietnamese(msg.speech);
+            }
+
+            updateStatsUI();
+
+            document.getElementById('explanation-text').innerHTML = q.explanation;
+            const feedbackArea = document.getElementById('feedback-area');
+            feedbackArea.classList.remove('hidden');
+
+            setTimeout(() => {
+                feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 120);
+        }
+
+        function nextQuestion() {
+            playClickSound();
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+            if (state.currentIndex < activeQuestions.length - 1) {
+                state.currentIndex++;
+                renderQuestion();
+            } else {
+                showFinalResults();
+            }
+        }
+
+        function showFinalResults() {
+            showScreen('screen-result');
+            playVictorySound();
+            launchConfetti(100);
+
+            document.getElementById('result-player-name').textContent = state.playerName;
+            document.getElementById('final-correct').textContent = state.correctCount;
+            document.getElementById('final-score').textContent = state.score;
+            document.getElementById('final-max-combo').textContent = state.maxCombo;
+
+            const rankIcon = document.getElementById('rank-icon');
+            const rankTitle = document.getElementById('rank-title');
+            const finalMessage = document.getElementById('final-message');
+
+            let summarySpeech = "";
+
+            if (state.correctCount >= 17) {
+                rankIcon.textContent = "👑";
+                rankTitle.textContent = "Bậc Thầy Di Truyền Menđen";
+                finalMessage.textContent = "Xuất sắc đỉnh cao! Bạn đã làm chủ hoàn toàn quy luật phân li, phân li độc lập, trội không hoàn toàn và di truyền nhóm máu ABO ở người!";
+                summarySpeech = `Chúc mừng ${state.playerName}! Bạn đạt ${state.correctCount} trên 20 câu và giành danh hiệu Bậc Thầy Di Truyền Menđen! Quá xuất sắc!`;
+            } else if (state.correctCount >= 12) {
+                rankIcon.textContent = "🧬";
+                rankTitle.textContent = "Chuyên Gia Lai Giống";
+                finalMessage.textContent = "Rất ấn tượng! Bạn nắm vững phương pháp tách từng cặp tính trạng, tính xác suất kiểu gene, kiểu hình và nhóm máu. Hãy xem lại vài câu chưa đúng để đạt điểm tuyệt đối nhé!";
+                summarySpeech = `Chúc mừng ${state.playerName} đạt ${state.correctCount} trên 20 câu với danh hiệu Chuyên Gia Lai Giống! Cố gắng thêm chút nữa là đạt điểm tuyệt đối nhé!`;
+            } else {
+                rankIcon.textContent = "🌱";
+                rankTitle.textContent = "Nhà Di Truyền Học Tập Sự";
+                finalMessage.textContent = "Một khởi đầu đầy nỗ lực! Hãy bấm vào từng ô số câu bên dưới để xem lại hướng dẫn giải chi tiết, sau đó thử sức lại để nâng cấp danh hiệu nhé!";
+                summarySpeech = `Hoàn thành thử thách! ${state.playerName} đúng ${state.correctCount} trên 20 câu. Hãy xem lại hướng dẫn giải chi tiết và thử lại nhé, bạn chắc chắn sẽ tiến bộ!`;
+            }
+
+            speakVietnamese(summarySpeech);
+
+            // Dựng bảng tổng kết 20 câu để học sinh bấm xem lại từng câu
+            const summaryGrid = document.getElementById('summary-grid');
+            const reviewBox = document.getElementById('review-box');
+            summaryGrid.innerHTML = '';
+            reviewBox.classList.add('hidden');
+
+            state.history.forEach((item, idx) => {
+                const pill = document.createElement('button');
+                pill.type = 'button';
+                pill.textContent = idx + 1;
+                pill.className = item.isCorrect
+                    ? "py-2 rounded-xl font-black text-xs bg-emerald-100 text-emerald-800 border border-emerald-400 hover:bg-emerald-200 transition cursor-pointer"
+                    : "py-2 rounded-xl font-black text-xs bg-rose-100 text-rose-800 border border-rose-400 hover:bg-rose-200 transition cursor-pointer";
+
+                pill.onclick = () => {
+                    playClickSound();
+                    const letters = ['A', 'B', 'C', 'D'];
+                    reviewBox.classList.remove('hidden');
+                    reviewBox.innerHTML = `
+                        <div class="font-extrabold text-pea-900">Câu ${idx + 1} (${item.questionObj.topic}):</div>
+                        <div class="font-bold text-slate-800">${item.questionObj.question}</div>
+                        <div class="text-xs font-bold ${item.isCorrect ? 'text-emerald-700' : 'text-rose-700'}">
+                            • Bạn chọn: <strong>${letters[item.selectedIndex]}. ${item.questionObj.options[item.selectedIndex]}</strong> ${item.isCorrect ? '✅' : '❌'}
+                        </div>
+                        ${!item.isCorrect ? `<div class="text-xs font-bold text-emerald-700">• Đáp án đúng: <strong>${letters[item.questionObj.correctIndex]}. ${item.questionObj.options[item.questionObj.correctIndex]}</strong></div>` : ''}
+                        <div class="pt-1.5 border-t border-slate-200 text-slate-700">${item.questionObj.explanation}</div>
+                    `;
+                };
+                summaryGrid.appendChild(pill);
+            });
+        }
+
+        // Hỗ trợ nhấn phím Enter ở ô nhập tên để bắt đầu ngay
+        document.getElementById('player-name-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                startGame();
+            }
+        });
+    </script>
+</body>
+</html>
